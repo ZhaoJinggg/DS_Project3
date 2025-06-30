@@ -3,14 +3,20 @@ echo Distributed Inventory System - Build Script
 echo ==========================================
 
 :: Set JavaFX path - Modify this path to your JavaFX installation
-set JAVAFX_PATH=C:\javafx\lib
+set JAVAFX_PATH=D:\openjfx-24.0.1_windows-x64_bin-sdk\javafx-sdk-24.0.1\lib
 
 :: Create output directory
 if not exist "out" mkdir out
 
 echo.
 echo Compiling Java sources...
-javac -d out -cp "src" src\main\*.java src\client\*.java src\server\*.java src\communication\*.java src\distributed\*.java src\inventory\*.java src\replication\*.java src\chatroom\*.java
+if exist "%JAVAFX_PATH%" (
+    echo Compiling with JavaFX classpath...
+    javac -d out -cp "src;%JAVAFX_PATH%\*" src\main\*.java src\client\*.java src\server\*.java src\communication\*.java src\distributed\*.java src\inventory\*.java src\replication\*.java src\chatroom\*.java
+) else (
+    echo JavaFX path not found, compiling without JavaFX...
+    javac -d out -cp "src" src\main\*.java src\client\*.java src\server\*.java src\communication\*.java src\distributed\*.java src\inventory\*.java src\replication\*.java src\chatroom\*.java
+)
 
 if %ERRORLEVEL% neq 0 (
     echo Compilation failed!
@@ -45,10 +51,12 @@ if "%1"=="server" (
 ) else if "%1"=="client" (
     echo Starting JavaFX Client...
     if exist "%JAVAFX_PATH%" (
-        java -cp "out" --module-path "%JAVAFX_PATH%" --add-modules javafx.controls,javafx.fxml main.Main client
+        java -cp "out;%JAVAFX_PATH%\*" main.Main client
     ) else (
-        echo Warning: JavaFX path not found. Trying without module path...
-        java -cp "out" main.Main client
+        echo Error: JavaFX path not found at: %JAVAFX_PATH%
+        echo Please check your JavaFX installation path
+        pause
+        exit /b 1
     )
 ) else if "%1"=="chat" (
     if "%2"=="" (

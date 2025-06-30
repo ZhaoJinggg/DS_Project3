@@ -38,7 +38,7 @@ public class BranchServer implements NetworkManager.MessageHandler {
         this.networkManager = new NetworkManager(branchId, port);
         this.lamportClock = new LamportClock();
         this.knownBranches = new HashSet<>();
-        this.mutex = new RicartAgrawalaMutex(branchId, knownBranches, lamportClock);
+        this.mutex = new RicartAgrawalaMutex(branchId, networkManager, lamportClock, knownBranches);
         this.clientManager = new ClientConnectionManager(this);
         this.chatroomServer = new ChatroomServer(branchId, port + 1000);
         this.replicationManager = new ReplicationManager(branchId, networkManager, lamportClock);
@@ -46,7 +46,6 @@ public class BranchServer implements NetworkManager.MessageHandler {
 
         // Set up callbacks
         networkManager.setMessageHandler(this);
-        mutex.setMessageSender(networkManager::sendMessage);
     }
 
     /**
@@ -124,7 +123,10 @@ public class BranchServer implements NetworkManager.MessageHandler {
         boolean connected = networkManager.connectToNode(otherBranchId, host, otherPort);
         if (connected) {
             knownBranches.add(otherBranchId);
+            // Note: Current RicartAgrawalaMutex doesn't support dynamic node addition
+            // The mutex will only work with initially known branches
             System.out.println("Connected to branch: " + otherBranchId);
+            System.out.println("Warning: Mutual exclusion only applies to initially known branches");
         }
         return connected;
     }
@@ -167,6 +169,7 @@ public class BranchServer implements NetworkManager.MessageHandler {
         if (!knownBranches.contains(otherBranchId)) {
             knownBranches.add(otherBranchId);
             System.out.println("New branch connected: " + otherBranchId);
+            System.out.println("Warning: Mutual exclusion only applies to initially known branches");
 
             Message ack = new Message(MessageType.ACK, branchId, otherBranchId);
             networkManager.sendMessage(otherBranchId, ack);
@@ -211,10 +214,7 @@ public class BranchServer implements NetworkManager.MessageHandler {
     }
 
     private void handleMutexMessage(Message message) {
-        Message response = mutex.handleMessage(message);
-        if (response != null) {
-            networkManager.sendMessage(message.getSenderId(), response);
-        }
+        mutex.handleMessage(message);
     }
 
     private void handlePing(Message message) {

@@ -9,12 +9,6 @@
 build.bat
 ```
 
-**Linux/Mac:**
-```bash
-chmod +x run.sh
-./run.sh
-```
-
 ### Step 2: Start Branch Servers
 
 Open **3 separate terminal windows** and run:
