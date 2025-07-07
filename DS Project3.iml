@@ -7,7 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
           <root url="file://$MODULE_DIR$/../../openjfx-24.0.1_windows-x64_bin-sdk/javafx-sdk-24.0.1/lib" />
@@ -17,5 +17,6 @@
         <jarDirectory url="file://$MODULE_DIR$/../../openjfx-24.0.1_windows-x64_bin-sdk/javafx-sdk-24.0.1/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="lib" level="project" />
   </component>
 </module>
